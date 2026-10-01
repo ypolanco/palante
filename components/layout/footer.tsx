@@ -4,6 +4,15 @@ import { COMMITTEE } from "@/lib/mock-data";
 
 const COLUMNS = [
   {
+    heading: "Fundraise",
+    links: [
+      { href: "/fundraisers/create", label: "Start a fundraiser" },
+      { href: "/fundraisers", label: "Explore fundraisers" },
+      { href: "/fundraisers/leaderboard", label: "Leaderboard" },
+      { href: "/dashboard/fundraisers", label: "My fundraisers" },
+    ],
+  },
+  {
     heading: "Platform",
     links: [
       { href: "/explore", label: "Explore projects" },
@@ -33,7 +42,7 @@ export function Footer() {
   return (
     <footer className="mt-24 bg-noche text-white">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div className="max-w-sm">
             <Logo tone="light" />
             <p className="mt-4 text-sm leading-relaxed text-white/70">

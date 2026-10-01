@@ -21,7 +21,7 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
           <p className="mt-2 text-muted-foreground">
             Contributions, updates, and reported spending across the platform.
           </p>
-          <ul className="mt-8 grid gap-x-10 md:grid-cols-2">
+          <ul className="mt-8 grid grid-cols-1 gap-x-10 md:grid-cols-2">
             {items.map((item) => {
               const { icon: Icon, className } = KIND[item.kind];
               const project = getProject(item.projectSlug);

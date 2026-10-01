@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -10,18 +10,24 @@ export const PRESET_AMOUNTS = [25, 50, 100, 250, 500, 1000];
 export function ContributionAmount({
   value,
   onChange,
+  presets = PRESET_AMOUNTS,
+  showOtherButton = false,
 }: {
   value: number | null;
   onChange: (value: number | null) => void;
+  presets?: number[];
+  /** Adds an "Other" tile that focuses the custom amount field. */
+  showOtherButton?: boolean;
 }) {
   const customId = useId();
-  const isPreset = value !== null && PRESET_AMOUNTS.includes(value);
+  const customRef = useRef<HTMLInputElement>(null);
+  const isPreset = value !== null && presets.includes(value);
 
   return (
     <fieldset>
       <legend className="font-heading text-lg font-bold text-noche">Choose an amount</legend>
       <div className="mt-4 grid grid-cols-3 gap-2.5">
-        {PRESET_AMOUNTS.map((amount) => (
+        {presets.map((amount) => (
           <button
             key={amount}
             type="button"
@@ -37,6 +43,21 @@ export function ContributionAmount({
             ${amount.toLocaleString("en-US")}
           </button>
         ))}
+        {showOtherButton ? (
+          <button
+            type="button"
+            aria-pressed={value !== null && !isPreset}
+            onClick={() => customRef.current?.focus()}
+            className={cn(
+              "h-12 rounded-xl border text-base font-semibold transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+              value !== null && !isPreset
+                ? "border-noche bg-noche text-white"
+                : "bg-white text-noche hover:border-noche/40",
+            )}
+          >
+            Other
+          </button>
+        ) : null}
       </div>
       <div className="mt-3">
         <Label htmlFor={customId} className="text-sm text-muted-foreground">
@@ -48,6 +69,7 @@ export function ContributionAmount({
           </span>
           <Input
             id={customId}
+            ref={customRef}
             inputMode="decimal"
             placeholder="0"
             value={!isPreset && value !== null ? String(value) : ""}

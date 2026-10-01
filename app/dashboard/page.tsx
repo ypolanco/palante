@@ -1,129 +1,178 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HandCoinsIcon, HeartHandshakeIcon, RepeatIcon } from "lucide-react";
+import {
+  BarChart3Icon,
+  EyeIcon,
+  HandCoinsIcon,
+  MousePointerClickIcon,
+  PencilIcon,
+  PlusIcon,
+  Share2Icon,
+  TargetIcon,
+  UsersIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/section";
 import { MockDataNote } from "@/components/layout/mock-data-note";
+import { FundsDisclosure } from "@/components/compliance/compliance-copy";
+import { TimeLeft } from "@/components/fundraisers/fundraiser-card";
+import { FundraiserCover } from "@/components/fundraisers/media";
 import { ProjectProgress } from "@/components/projects/project-progress";
+import { ShareButton } from "@/components/share/share-panel";
 import { TransparencyCard } from "@/components/transparency/transparency-card";
+import { formatRate, fundraiserPath, relativeTime } from "@/lib/fundraisers/utils";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { getProject, mockContributor } from "@/lib/mock-data";
-import type { Project } from "@/lib/types";
-import { formatCurrency, formatDate, percentFunded } from "@/lib/utils";
+  getCurrentUser,
+  getFundraiserAnalytics,
+  listFundraisersByOrganizer,
+  listRecentContributions,
+} from "@/lib/services/fundraisers";
+import { formatCurrency, formatNumber, percentFunded } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Your dashboard",
 };
 
-export default function DashboardPage() {
-  const { contributions, following } = mockContributor;
-  const total = contributions.reduce((s, c) => s + c.amount, 0);
-  const recurring = contributions.filter((c) => c.recurring);
-  const monthly = new Set(recurring.map((c) => c.projectSlug)).size;
-  const followed = following
-    .map((slug) => getProject(slug))
-    .filter((p): p is Project => Boolean(p));
-  const latestUpdates = followed
-    .flatMap((p) => p.updates.map((u) => ({ ...u, project: p })))
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 4);
+export default async function DashboardPage() {
+  const user = await getCurrentUser();
+  const mine = await listFundraisersByOrganizer(user.id);
+  const fundraiser = mine.find((f) => f.status === "active");
+
+  if (!fundraiser) {
+    return (
+      <Container className="py-16">
+        <p className="text-muted-foreground">Welcome, {user.firstName}</p>
+        <h1 className="text-4xl font-extrabold text-noche">Start your first fundraiser</h1>
+        <p className="mt-3 max-w-xl text-lg text-muted-foreground">
+          Create a page, share it with your community, and track your progress here.
+        </p>
+        <Button asChild variant="brand" size="xl" className="mt-8">
+          <Link href="/fundraisers/create">Start a Fundraiser</Link>
+        </Button>
+      </Container>
+    );
+  }
+
+  const [analytics, recent] = await Promise.all([
+    getFundraiserAnalytics(fundraiser.id),
+    listRecentContributions(fundraiser.id, 6),
+  ]);
+  const pct = percentFunded(fundraiser.raised, fundraiser.goal);
+  const remaining = Math.max(0, fundraiser.goal - fundraiser.raised);
+  const conversion = analytics?.conversionRate ?? 0;
 
   return (
     <Container className="py-10 sm:py-14">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-muted-foreground">Welcome back</p>
-          <h1 className="text-4xl font-extrabold text-noche">{mockContributor.name}</h1>
+          <p className="text-muted-foreground">Welcome back, {user.firstName}</p>
+          <h1 className="text-4xl font-extrabold text-noche">Your fundraising</h1>
           <MockDataNote className="mt-2" />
         </div>
-        <Button asChild variant="brand" size="xl">
-          <Link href="/explore">Find a project</Link>
+        <Button asChild variant="outline" size="xl">
+          <Link href="/fundraisers/create">
+            <PlusIcon data-icon="inline-start" aria-hidden="true" />
+            New fundraiser
+          </Link>
         </Button>
       </div>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-3">
-        <TransparencyCard icon={HandCoinsIcon} label="Total contributed" value={formatCurrency(total)} hint="Calendar year 2026" />
-        <TransparencyCard icon={HeartHandshakeIcon} label="Projects supported" value={String(new Set(contributions.map((c) => c.projectSlug)).size)} />
-        <TransparencyCard icon={RepeatIcon} label="Monthly contributions" value={String(monthly)} />
+      <section aria-labelledby="active-title" className="mt-8 overflow-hidden rounded-3xl border bg-card">
+        <div className="grid grid-cols-1 lg:grid-cols-[18rem_1fr]">
+          <FundraiserCover src={fundraiser.coverImage} alt={fundraiser.coverImageAlt} sizes="288px" className="aspect-[16/9] lg:aspect-auto lg:h-full" />
+          <div className="p-6 sm:p-8">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-jade-soft px-2.5 py-0.5 font-medium text-jade">
+                <span className="size-1.5 rounded-full bg-jade" aria-hidden="true" />
+                Active
+              </span>
+              <span className="text-muted-foreground"><TimeLeft fundraiser={fundraiser} /></span>
+            </div>
+            <h2 id="active-title" className="mt-2 text-2xl font-bold text-noche sm:text-3xl">
+              <Link href={fundraiserPath(fundraiser.slug)} className="hover:underline">{fundraiser.title}</Link>
+            </h2>
+
+            <p className="tabular mt-5 font-heading text-4xl font-extrabold tracking-tight text-noche">
+              {formatCurrency(fundraiser.raised)}
+              <span className="ml-2 align-middle font-sans text-base font-medium tracking-normal text-muted-foreground">
+                raised of {formatCurrency(fundraiser.goal)}
+              </span>
+            </p>
+            <ProjectProgress raised={fundraiser.raised} goal={fundraiser.goal} label={fundraiser.title} size="lg" animate className="mt-4" />
+            <p className="tabular mt-2 text-sm text-muted-foreground">
+              <span className="font-semibold text-jade">{pct}%</span> of your goal
+              {remaining > 0 ? <> · {formatCurrency(remaining)} to go</> : <> · goal reached!</>}
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <ShareButton fundraiser={fundraiser} editableMessage variant="brand" size="xl" className="sm:px-8">
+                <Share2Icon aria-hidden="true" />
+                Share Fundraiser
+              </ShareButton>
+              <Button asChild variant="outline" size="xl">
+                <Link href={`/dashboard/fundraisers/${fundraiser.id}/analytics`}>
+                  <BarChart3Icon data-icon="inline-start" aria-hidden="true" />
+                  Analytics
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="xl">
+                <Link href={`/dashboard/fundraisers/${fundraiser.id}/edit`}>
+                  <PencilIcon data-icon="inline-start" aria-hidden="true" />
+                  Edit page
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <TransparencyCard icon={HandCoinsIcon} label="Total raised" value={formatCurrency(fundraiser.raised)} />
+        <TransparencyCard icon={TargetIcon} label="Fundraising goal" value={formatCurrency(fundraiser.goal)} />
+        <TransparencyCard icon={UsersIcon} label="Contributors" value={formatNumber(fundraiser.contributorCount)} />
+        <TransparencyCard icon={EyeIcon} label="Page views" value={formatNumber(fundraiser.pageViews)} />
+        <TransparencyCard
+          icon={MousePointerClickIcon}
+          label="Conversion rate"
+          value={formatRate(conversion)}
+          hint="Visitors who contributed"
+          className="col-span-2 lg:col-span-1"
+        />
       </div>
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
-        <section aria-labelledby="following-title">
-          <h2 id="following-title" className="text-2xl font-bold text-noche">Projects you follow</h2>
-          <ul className="mt-5 space-y-3">
-            {followed.map((p) => (
-              <li key={p.slug} className="rounded-2xl border bg-card p-5">
-                <div className="flex items-baseline justify-between gap-4">
-                  <Link href={`/projects/${p.slug}`} className="font-bold text-noche hover:underline">
-                    {p.title}
-                  </Link>
-                  <span className="tabular shrink-0 text-sm font-semibold text-jade">
-                    {percentFunded(p.raised, p.goal)}%
-                  </span>
-                </div>
-                <ProjectProgress raised={p.raised} goal={p.goal} label={p.title} size="sm" className="mt-3" />
-                <p className="tabular mt-2 text-sm text-muted-foreground">
-                  {formatCurrency(p.raised)} of {formatCurrency(p.goal)} · {p.daysLeft} days left
-                </p>
-              </li>
-            ))}
-          </ul>
-
-          <h2 className="mt-12 text-2xl font-bold text-noche">Contribution history</h2>
-          <div className="mt-5 overflow-hidden rounded-2xl border bg-card">
-            <Table>
-              <TableHeader className="bg-muted/60">
-                <TableRow>
-                  <TableHead className="pl-5">Date</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead className="pr-5 text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {contributions.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="tabular pl-5 text-muted-foreground">
-                      {formatDate(c.date, { short: true })}
-                    </TableCell>
-                    <TableCell className="max-w-56 truncate text-noche">
-                      {getProject(c.projectSlug)?.title}
-                      {c.recurring ? (
-                        <span className="ml-2 rounded-full bg-sand px-2 py-0.5 text-xs">Monthly</span>
-                      ) : null}
-                    </TableCell>
-                    <TableCell className="tabular pr-5 text-right font-semibold text-noche">
-                      {formatCurrency(c.amount)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+      <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1.4fr_1fr]">
+        <section aria-labelledby="recent-title">
+          <div className="flex items-baseline justify-between">
+            <h2 id="recent-title" className="text-2xl font-bold text-noche">Recent contributions</h2>
+            <Link href={`/dashboard/fundraisers/${fundraiser.id}/analytics`} className="text-sm font-medium text-jade hover:underline">
+              See analytics
+            </Link>
           </div>
-        </section>
-
-        <section aria-labelledby="latest-title">
-          <h2 id="latest-title" className="text-2xl font-bold text-noche">Latest from your projects</h2>
-          <ul className="mt-5 space-y-3">
-            {latestUpdates.map((u) => (
-              <li key={u.id} className="rounded-2xl bg-sand p-5">
-                <p className="text-xs text-muted-foreground">
-                  <time dateTime={u.date}>{formatDate(u.date, { short: true })}</time>
-                </p>
-                <p className="mt-1 font-bold text-noche">{u.title}</p>
-                <Link href={`/projects/${u.project.slug}#updates`} className="mt-1 inline-block text-sm text-jade hover:underline">
-                  {u.project.title}
-                </Link>
+          <ul className="mt-4 divide-y rounded-2xl border bg-card">
+            {recent.map((c) => (
+              <li key={c.id} className="flex items-start gap-3 p-4">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-noche">{c.displayName ?? "Anonymous"}</p>
+                  {c.message ? <p className="mt-0.5 text-sm text-muted-foreground">&ldquo;{c.message}&rdquo;</p> : null}
+                  <p className="mt-0.5 text-xs text-muted-foreground">{relativeTime(c.createdAt)}</p>
+                </div>
+                <p className="tabular font-heading font-bold text-noche">{formatCurrency(c.amount)}</p>
               </li>
             ))}
           </ul>
         </section>
+
+        <aside className="space-y-4">
+          <div className="rounded-2xl bg-sand p-6">
+            <h2 className="text-lg font-bold text-noche">Keep the momentum going</h2>
+            <ul className="mt-3 space-y-2 text-sm leading-relaxed text-noche/85">
+              <li>Text the link to five people who care about your community.</li>
+              <li>Post an update when you hit a milestone. Supporters love progress.</li>
+              <li>Thank recent contributors by name (with their permission).</li>
+            </ul>
+          </div>
+          <FundsDisclosure />
+        </aside>
       </div>
     </Container>
   );

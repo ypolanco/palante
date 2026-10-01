@@ -16,7 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { href: "/explore", label: "Explore" },
+  { href: "/fundraisers", label: "Fundraisers" },
+  { href: "/explore", label: "Projects" },
   { href: "/how-it-works", label: "How It Works" },
   { href: "/transparency", label: "Transparency" },
   { href: "/updates", label: "Updates" },
@@ -26,6 +27,11 @@ const NAV_LINKS = [
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
+
+const ACCOUNT_LINKS = [
+  { href: "/dashboard", label: "Your dashboard" },
+  { href: "/sign-in", label: "Sign In" },
+] as const;
 
 export function Navbar() {
   const pathname = usePathname();
@@ -57,10 +63,13 @@ export function Navbar() {
 
         <div className="ml-auto flex items-center gap-2">
           <Button asChild variant="ghost" size="lg" className="hidden sm:inline-flex">
-            <Link href="/sign-in">Sign In</Link>
+            <Link href="/dashboard">Dashboard</Link>
           </Button>
           <Button asChild variant="brand" size="lg">
-            <Link href="/explore">Contribute</Link>
+            <Link href="/fundraisers/create">
+              <span className="sm:hidden">Start</span>
+              <span className="hidden sm:inline">Start a Fundraiser</span>
+            </Link>
           </Button>
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -88,15 +97,24 @@ export function Navbar() {
                       </Link>
                     </li>
                   ))}
-                  <li className="mt-4 border-t pt-4">
-                    <Link
-                      href="/sign-in"
-                      onClick={() => setOpen(false)}
-                      className="block rounded-md px-2 py-3 text-base font-medium text-muted-foreground hover:bg-muted"
-                    >
-                      Sign In
-                    </Link>
+                  <li className="mt-4 mb-2 border-t pt-4">
+                    <Button asChild variant="brand" size="xl" className="w-full">
+                      <Link href="/fundraisers/create" onClick={() => setOpen(false)}>
+                        Start a Fundraiser
+                      </Link>
+                    </Button>
                   </li>
+                  {ACCOUNT_LINKS.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        onClick={() => setOpen(false)}
+                        className="block rounded-md px-2 py-3 text-base font-medium text-muted-foreground hover:bg-muted"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </nav>
             </SheetContent>

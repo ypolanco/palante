@@ -16,6 +16,8 @@ const body = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
+  // Absolute base for Open Graph images in shared fundraiser links.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
     default: "Palante Together — Fund independent political projects",
     template: "%s | Palante Together",
