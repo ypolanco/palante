@@ -18,6 +18,8 @@ export const COMMITTEE = {
   type: "Independent expenditure-only political committee (Super PAC)",
   /** Same as `type`, phrased for use mid-sentence. */
   descriptor: "independent expenditure-only political committee (Super PAC)",
+  /** Product positioning, used in headlines and taglines. */
+  tagline: "The crowdfunded super PAC",
   fecId: "C00XXXXXX (placeholder)",
   treasurer: "Treasurer name (placeholder)",
 };

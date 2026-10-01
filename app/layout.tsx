@@ -19,11 +19,11 @@ export const metadata: Metadata = {
   // Absolute base for Open Graph images in shared fundraiser links.
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
-    default: "Palante Together — Fund independent political projects",
+    default: "Palante Together — The crowdfunded super PAC",
     template: "%s | Palante Together",
   },
   description:
-    "Move forward. Fund together. See the impact. Fund independent political projects and see where the money goes.",
+    "Palante Together is a crowdfunded super PAC. Pool small contributions behind independent political projects and see exactly where the money goes.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -45,7 +45,8 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div className="max-w-sm">
             <Logo tone="light" />
-            <p className="mt-4 text-sm leading-relaxed text-white/70">
+            <p className="mt-4 text-sm font-semibold text-white">{COMMITTEE.tagline}</p>
+            <p className="mt-1 text-sm leading-relaxed text-white/70">
               Move forward. Fund together. See the impact.
             </p>
           </div>

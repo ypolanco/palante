@@ -45,8 +45,10 @@ export default function AboutPage() {
             actually paid for.
           </p>
           <p>
-            Palante Together turns independent political work into visible
-            projects. Each one has a goal, a budget, a timeline, and a public
+            Palante Together is a crowdfunded super PAC: instead of relying on
+            a few wealthy donors, it&apos;s powered by many small contributions
+            from the communities it serves. It turns independent political work
+            into visible projects. Each one has a goal, a budget, a timeline, and a public
             record of spending, so communities can pool resources around the
             work they believe in and watch it happen.
           </p>

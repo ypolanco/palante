@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRightIcon, ShieldCheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/section";
+import { COMMITTEE } from "@/lib/mock-data";
 import { FundraiserCover, OrganizerAvatar } from "@/components/fundraisers/media";
 import { ProjectProgress } from "@/components/projects/project-progress";
 import { fundraiserPath } from "@/lib/fundraisers/utils";
@@ -84,7 +85,7 @@ export function Hero({ items }: { items: [HeroItem, HeroItem, HeroItem] }) {
         <div>
           <p className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-sm font-medium text-noche">
             <span className="size-2 rounded-full bg-marigold" aria-hidden="true" />
-            Community-powered fundraising
+            {COMMITTEE.tagline}
           </p>
           <h1
             id="hero-title"
@@ -95,9 +96,10 @@ export function Hero({ items }: { items: [HeroItem, HeroItem, HeroItem] }) {
             Move Forward Together.
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            Create your own fundraising page for Palante Together, share it with
-            your community, and help fund the causes and political work you care
-            about.
+            Palante Together is a super PAC funded by everyday people, not a
+            handful of big donors. Create your own fundraising page, share it
+            with your community, and pool small contributions behind the
+            political work you care about.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild variant="brand" size="xl">
