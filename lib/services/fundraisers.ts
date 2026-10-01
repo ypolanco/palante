@@ -5,8 +5,9 @@
  *
  * TODO(backend): replace mock lookups with API/database calls.
  */
+import { redirect } from "next/navigation";
+import { getSessionUserId } from "@/lib/auth/session";
 import {
-  CURRENT_USER_ID,
   buildAnalytics,
   contributions,
   fundraisers,
@@ -58,13 +59,25 @@ export async function listOrganizers(): Promise<User[]> {
 }
 
 /**
- * The signed-in supporter. Authentication isn't connected in this preview.
- * TODO(auth): resolve from the session.
+ * The signed-in user, resolved from the session cookie. Redirects to sign-in
+ * when there is no valid session.
  */
 export async function getCurrentUser(): Promise<User> {
-  const user = users.find((u) => u.id === CURRENT_USER_ID);
-  if (!user) throw new Error("Mock current user missing");
+  const user = await getSessionUser();
+  if (!user) redirect("/sign-in");
   return user;
+}
+
+/** The signed-in user, or undefined when signed out. */
+export async function getSessionUser(): Promise<User | undefined> {
+  const userId = await getSessionUserId();
+  return userId ? users.find((u) => u.id === userId) : undefined;
+}
+
+/** Demo credential check: any known mock email signs in. */
+export async function findUserByEmail(email: string): Promise<User | undefined> {
+  const normalized = email.trim().toLowerCase();
+  return users.find((u) => u.email.toLowerCase() === normalized);
 }
 
 export async function listRecentContributions(

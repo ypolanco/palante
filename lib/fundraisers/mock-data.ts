@@ -29,9 +29,6 @@ export const users: User[] = [
   { id: "u-admin", name: "Sam Okafor", firstName: "Sam", email: "sam@example.com", role: "admin", joinedOn: "2026-01-05" },
 ];
 
-/** The signed-in supporter in this preview. */
-export const CURRENT_USER_ID = "u-maria";
-
 const MARIA_STORY = `My kids are growing up in a neighborhood that too often gets overlooked when big decisions are made. I started this fundraiser because I believe **change starts with people who show up for each other**.
 
 Every dollar raised here goes directly to Palante Together to support independent, people-powered political work. I don't touch the money. I just want to help our community be part of it.
